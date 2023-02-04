@@ -1,11 +1,14 @@
-%token a
-%token b
+%token ab
+%token d
 %token c
 
 %start S
 %%
-S: a
- | A
-a: b
+S: ab
+ | ab B
+A: ab
+ | c
+ | d S
+B: ε
  | c
 %%

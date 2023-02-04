@@ -4,7 +4,7 @@
 %start S
 %%
 S: A
-A: aB
-B: aB
- | bb
+A: a B
+B: a B
+ | b b
 %%

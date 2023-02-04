@@ -6,6 +6,7 @@ import java.io.IOException;
 
 public class FileRead {
 
+    /** parses the file into a grammar **/
     public void readText(String fileName, Grammar grammar) throws IOException {
         FileReader fReader = new FileReader(fileName);
         BufferedReader buffReader = new BufferedReader(fReader);
@@ -16,21 +17,31 @@ public class FileRead {
 
         while (buffReader.ready()) {
             line = buffReader.readLine();
+
+            /* entry in the alphabet of terminal symbols */
             if(line.contains("%token")){
                 word = (String) line.subSequence(7, line.length());
                 grammar.getT().getAlphabet().add(word);
             }
+
+            /* entry of the initial symbol also adding in non-terminal symbols **/
             else if(line.contains("%start")){
                 word = (String) line.subSequence(7, line.length());
                 grammar.setS(word);
                 grammar.getN().getAlphabet().add(word);
             }
+
+            /* rule area label */
             else if(line.equals("%%")){
                 counter++;
             }
+
+            /* parsing rule area */
             else if(counter == 1){
                 String value;
                 int position;
+
+                /* the line does not contain an OR rule **/
                 if(line.charAt(0) != ' '){
                     position = line.indexOf(":");
                     word = (String) line.subSequence(0, position);
@@ -43,12 +54,14 @@ public class FileRead {
                     }
 
                 }
+
+                /* the line contains an OR rule **/
                 else{
                     position = line.indexOf("|");
 
                 }
                 value = (String) line.subSequence(position+2, line.length());
-                grammar.setProductions(word, value);
+                grammar.addToProductions(word, value);
             }
             //System.out.println(line);
         }

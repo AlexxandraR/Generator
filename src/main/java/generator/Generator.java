@@ -13,6 +13,7 @@ public class Generator {
         this.word = new StringBuilder();
 
         this.readGrammar(fileName);
+        this.grammar.eliminateEpsilonProductions();
     }
 
     private void readGrammar(String fileName) throws IOException {

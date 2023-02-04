@@ -1,0 +1,13 @@
+%token ab
+%token bc
+%token cd
+
+%start Start
+%%
+Start: ab Prva
+ | ε
+Prva: bc Druha
+Druha: cd bc Start
+ | Start
+ | ε
+%%
