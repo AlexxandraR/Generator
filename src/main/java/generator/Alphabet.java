@@ -1,18 +1,50 @@
 package generator;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Alphabet {
     private LettersType type;
-    private List<String> alphabet;
+    private Set<String> alphabet;
 
     public Alphabet(LettersType type) {
         this.type = type;
-        this.alphabet = new ArrayList<>();
+        this.alphabet = new LinkedHashSet<>();
     }
 
-    public List<String> getAlphabet() {
+    public Set<String> getAlphabet() {
         return alphabet;
+    }
+
+    public String getSymbol(int index){
+        int i = 1;
+        for(String s : this.alphabet){
+            if(i == index){
+                return s;
+            }
+            i++;
+        }
+        return null;
+    }
+
+    public int getIndex(String word){
+        int i = 1;
+        for(String s : this.alphabet){
+            if(Objects.equals(s, word)){
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
+
+    public String getTerminal(int index) {
+        int i = 0;
+        for(String word : this.alphabet){
+            if(i == index){
+                return word;
+            }
+            i++;
+        }
+        return "";
     }
 }

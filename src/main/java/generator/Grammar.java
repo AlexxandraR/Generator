@@ -80,6 +80,27 @@ public class Grammar {
         return false;
     }
 
+    public void removeTerminals(){
+        for(int i = 0; i < this.t.getAlphabet().size(); i++){
+            String terminal = this.t.getTerminal(i);
+            boolean contains = false;
+            for(Productions p : this.productions){
+                for(String s : p.getRightSide()){
+                    if(s.contains(terminal)){
+                        contains = true;
+                        break;
+                    }
+                }
+                if(contains){
+                    break;
+                }
+            }
+            if(!contains){
+                this.t.getAlphabet().remove(terminal);
+            }
+        }
+    }
+
     private boolean findSymbolRight(String symbol){
         for(Productions p : this.productions){
             for(String s : p.getRightSide()){
@@ -143,7 +164,7 @@ public class Grammar {
             this.s = left;
         }
 
-        System.out.print("N_ε: ");
+        /*System.out.print("N_ε: ");
 
         for(String s : n_epsilon){
             System.out.print(s + ", ");
@@ -173,7 +194,7 @@ public class Grammar {
                 }
             }
 
-        }
+        }*/
     }
 
     /** generates new productions **/
@@ -264,6 +285,140 @@ public class Grammar {
             }
         }
         return n_e;
+    }
+
+    public boolean removingRedundantSymbols(){
+        Set<String> remainingSymbols = deriveTerminals();
+        if(!remainingSymbols.contains(this.s)){
+            System.out.println("The grammar generates an empty language, so no word can be derived from the initial symbol.");
+            return false;
+        }
+        else{
+            this.deleteNonterminals(remainingSymbols, true);
+            remainingSymbols = availableNonterminals();
+            this.deleteNonterminals(remainingSymbols, false);
+            this.removeTerminals();
+
+            /*System.out.print("\nN: ");
+            for(String s : this.n.getAlphabet()){
+                System.out.print(s + ", ");
+            }
+            System.out.print("\nT: ");
+            for(String s : this.t.getAlphabet()){
+                System.out.print(s + ", ");
+            }
+            System.out.println("\nS: " + s);
+            System.out.println("P: ");
+
+            for(Productions p : productions){
+                System.out.print(p.getLeftSide() + " -> ");
+                int numberOfRightStrings = p.getRightSide().size();
+                for(int j = 0; j < numberOfRightStrings; j++) {
+                    String s = p.findRightSideString(j);
+                    if(j == 0){
+                        System.out.println(s);
+                    }
+                    else{
+                        System.out.println("  |  " + s);
+                    }
+                }
+
+            }*/
+
+            return true;
+        }
+    }
+
+    private Set<String> availableNonterminals(){
+        Set<String> v_d = new HashSet<>();
+        Set<String> v_d1 = new HashSet<>(v_d);
+        v_d.add(this.s);
+        do{
+            v_d1.addAll(v_d);
+            v_d.addAll(findNonterminals(v_d1));
+        }while(v_d.size() != v_d1.size());
+        /*System.out.println("VD");
+        for(String word : v_d){
+            System.out.println(word);
+        }*/
+        return v_d;
+    }
+
+    private Set<String> findNonterminals(Set<String> v_d){
+        Set<String> v_d1 = new HashSet<>();
+        for(String s : v_d){
+            Productions production = this.getProductions(s);
+            if(production != null){
+                for(String word : production.getRightSide()){
+                    for(String nonterminal : this.n.getAlphabet()){
+                        if(word.contains(nonterminal)){
+                            v_d1.add(nonterminal);
+                        }
+                    }
+                }
+            }
+
+        }
+        return v_d1;
+    }
+
+    private Set<String> deriveTerminals(){
+        Set<String> n_t = new HashSet<>();
+        Set<String> n_t1 = new HashSet<>(n_t);
+        do{
+            n_t1.addAll(n_t);
+            n_t.addAll(findDeriveTerminals(n_t1));
+        }while(n_t.size() != n_t1.size());
+        //this.deleteNonterminals(n_t);
+        /*System.out.println("NT");
+        for(String word : n_t){
+            System.out.println(word);
+        }*/
+        return n_t;
+    }
+
+    private Set<String> findDeriveTerminals(Set<String> n_t){
+        Set<String> n_t1 = new HashSet<>();
+        for(Productions p : this.productions){
+            for(String s : p.getRightSide()){
+                boolean toAdd = true;
+                int begin = 0;
+                int end = s.indexOf(" ", begin);
+                while(true){
+                    if(end == -1){
+                        end = s.length();
+                    }
+                    String word = s.substring(begin, end);
+                    if(!this.t.getAlphabet().contains(word) && !n_t.contains(word) && !word.equals("ε")){
+                        toAdd = false;
+                        break;
+                    }
+                    if(end == s.length()){
+                        break;
+                    }
+                    begin = end + 1;
+                    end = s.indexOf(" ", begin + 1);
+                }
+                if(toAdd){
+                    n_t1.add(p.getLeftSide());
+                    break;
+                }
+            }
+        }
+        return n_t1;
+    }
+
+    private void deleteNonterminals(Set<String> nonterminals, boolean removeFromRight){
+        for(int i = 0; i < this.n.getAlphabet().size(); i++){
+            String symbol = this.n.getTerminal(i);
+            if(!nonterminals.contains(symbol)){
+                this.n.getAlphabet().remove(symbol);
+                this.productions.remove(this.getProductions(symbol));
+                if(removeFromRight){
+                    deleteProductionRight(symbol);
+                }
+            }
+        }
     }
 
 }

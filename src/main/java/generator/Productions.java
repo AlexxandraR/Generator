@@ -43,4 +43,50 @@ public class Productions {
         return "";
     }
 
+    public String findSymbolInProduction(int j, int k){
+        String word = this.findRightSideString(j);
+        int i = 1;
+        int start = -1;
+        int end = word.indexOf(" ");
+        String nonterminal = "";
+        if(i == k && end != -1){
+            nonterminal = word.substring(0, end);
+            return nonterminal;
+        }
+        do{
+            start = word.indexOf(" ", start+1);
+            i++;
+        }while(i < k);
+        if(start != -1){
+            end = word.indexOf(" ", start+1);
+            if(end != -1){
+                nonterminal = word.substring(start + 1, end);
+            }
+            else{
+                nonterminal = word.substring(start + 1);
+            }
+        }
+        else{
+            nonterminal = word;
+        }
+
+        return nonterminal;
+    }
+
+    public int lenghtOfProduction(int j){
+        String word = this.findRightSideString(j);
+        int count = 1;
+        int end = word.indexOf(" ");
+        int start = 0;
+        if(end != -1){
+            do{
+                count++;
+                start = end;
+                end = word.indexOf(" ", start+1);
+
+            }while(end != -1);
+        }
+        return count;
+    }
+
 }

@@ -1,0 +1,14 @@
+%token a
+%token b
+%token d
+%token c
+
+%start S
+%%
+S: a A
+ | B
+A: b B
+B: d B
+C: a b C
+D: a
+%%

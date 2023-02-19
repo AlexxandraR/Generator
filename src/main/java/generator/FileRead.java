@@ -49,9 +49,10 @@ public class FileRead {
                         System.out.println("The grammar is not correct: The terminal symbol cannot be on the left side of the production.");
                         break;
                     }
-                    else if(!grammar.getN().getAlphabet().contains(word)) {
+                    grammar.getN().getAlphabet().add(word);
+                    /*else if(!grammar.getN().getAlphabet().contains(word)) {
                         grammar.getN().getAlphabet().add(word);
-                    }
+                    }*/
 
                 }
 
@@ -65,7 +66,7 @@ public class FileRead {
             }
             //System.out.println(line);
         }
-
+        grammar.removeTerminals();
 
         /*for (String i : grammar.getT().getAlphabet()){
             System.out.println(i);
