@@ -1,0 +1,14 @@
+%token begin
+%token end
+%token p1
+%token p2
+%token ;
+
+%start <program>
+%%
+<program>: begin <postupnost prikazov> end
+<postupnost prikazov>: <prikaz> ; <postupnost prikazov>
+ | ε
+<prikaz>: p1
+ | p2
+%%

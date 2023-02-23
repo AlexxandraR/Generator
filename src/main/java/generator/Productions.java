@@ -43,6 +43,7 @@ public class Productions {
         return "";
     }
 
+    /** co ak ma neterminalny symbol medzeru??????? **/
     public String findSymbolInProduction(int j, int k){
         String word = this.findRightSideString(j);
         int i = 1;
