@@ -43,13 +43,12 @@ public class Productions {
         return "";
     }
 
-    /** co ak ma neterminalny symbol medzeru??????? **/
     public String findSymbolInProduction(int j, int k){
         String word = this.findRightSideString(j);
         int i = 1;
         int start = -1;
         int end = word.indexOf(" ");
-        String nonterminal = "";
+        String nonterminal;
         if(i == k && end != -1){
             nonterminal = word.substring(0, end);
             return nonterminal;
@@ -74,17 +73,16 @@ public class Productions {
         return nonterminal;
     }
 
-    public int lenghtOfProduction(int j){
+    public int lengthOfProduction(int j){
         String word = this.findRightSideString(j);
         int count = 1;
         int end = word.indexOf(" ");
-        int start = 0;
+        int start;
         if(end != -1){
             do{
                 count++;
                 start = end;
                 end = word.indexOf(" ", start+1);
-
             }while(end != -1);
         }
         return count;

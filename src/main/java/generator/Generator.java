@@ -1,120 +1,158 @@
 package generator;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 
 public class Generator {
     private final Grammar grammar;
-    private final long length;
+    private int length;
     private StringBuilder word;
-    private Random rnd;
-    private HashMap<List<Long>, List<Long>> fValues;
+    private final Random rnd;
+    private final HashMap<List<Integer>, List<BigInteger>> fValues;
+    private final FileWrite fileWriter;
 
-    public Generator(String fileName, long length) throws IOException {
+    public Generator(String fileName, int beginLength, int endLength, int numberOfRepetitions) throws IOException {
         this.grammar = new Grammar();
-        this.length = length;
         this.word = new StringBuilder();
         this.rnd = new Random(System.currentTimeMillis());
         this.fValues = new HashMap<>();
+        this.length = 0;
+        this.fileWriter = new FileWrite();
 
-        this.readGrammar(fileName);
-        this.grammar.eliminateEpsilonProductions();
-        boolean continueOrNot = this.grammar.removingRedundantSymbols();
-        if(continueOrNot){
-            HashMap<String, Long> counter = new HashMap<>();
-            for(long i = 0; i < 1; i++){
-                this.word = g1(this.grammar.getN().getIndex(this.grammar.getS()), this.length);
-                if (this.word != null) {
-                    System.out.println(this.word);
-                    if(counter.containsKey(this.word.toString())){
-                        counter.replace(this.word.toString(), counter.get(this.word.toString()) + 1);
+        generate(fileName, beginLength, endLength, numberOfRepetitions);
+    }
+
+    public Grammar getGrammar() {
+        return grammar;
+    }
+
+    private void generate(String fileName, int beginLength, int endLength, int numberOfRepetitions) throws IOException {
+        String canContinue = this.readGrammar(fileName);
+
+        this.fileWriter.writeText(this, beginLength, endLength, numberOfRepetitions);
+
+        if(canContinue == null){
+            this.grammar.eliminateEpsilonProductions();
+            if(this.grammar.containsCyclus()){
+                this.grammar.ownGrammar();
+            }
+            boolean continueOrNot = this.grammar.removingRedundantSymbols();
+
+            if(continueOrNot){
+                HashMap<String, Integer> counter = new HashMap<>();
+                for(int i = 0; i < numberOfRepetitions; i++) {
+                    if(endLength < beginLength){
+                        this.fileWriter.writeException("Word length generation limits are specified incorrectly.");
+                        break;
                     }
-                    else{
-                        counter.put(this.word.toString(), 1L);
+                    this.length = rnd.nextInt(endLength - beginLength + 1) + beginLength;
+                    //System.out.println(this.length);
+                    if (this.length == 0 && this.grammar.getProductions(this.grammar.getS()).findIndex("ε") != -1) {
+                        //System.out.println("This grammar generates a word of length 0.");
+                        this.fileWriter.appendText("This grammar generates an empty word.");
                     }
-                } else {
-                    System.out.println("This grammar does not produce words of length " + this.length);
+                    else if (this.length == 0 && this.grammar.getProductions(this.grammar.getS()).findIndex("ε") == -1) {
+                        //System.out.println("This grammar does not generate a word of length 0.");
+                        this.fileWriter.appendText("This grammar does not generates an empty word.");
+                    }
+                    else {
+                        this.word = g1(this.grammar.getN().getIndex(this.grammar.getS()), this.length);
+                        if (this.word != null) {
+                            //System.out.println(this.word);
+                            this.fileWriter.appendText(this.word.toString());
+                            if (counter.containsKey(this.word.toString())) {
+                                counter.replace(this.word.toString(), counter.get(this.word.toString()) + 1);
+                            }
+                            else {
+                                counter.put(this.word.toString(), 1);
+                            }
+                        }
+                        else{
+                            //System.out.println("This grammar does not produce words of length " + this.length + ".");
+                            this.fileWriter.appendText("This grammar does not produce words of length " + this.length + ".");
+                        }
+                    }
+                }
+                if (!counter.isEmpty()) {
+                    //System.out.println(counter);
+                    this.fileWriter.appendStatistics(counter);
                 }
             }
-            if(!counter.isEmpty()){
-                System.out.println(counter);
+            else{
+                this.fileWriter.writeException("The grammar generates an empty language, so no word can be derived from the initial symbol.");
             }
         }
-        /*List<longeger> l = this.f1(2, 3);
-        for(longeger i : l){
-            System.out.println
-           (i);
-        }*/
-
-
+        else{
+            this.fileWriter.writeException(canContinue);
+        }
     }
 
-    private void readGrammar(String fileName) throws IOException {
+    private String readGrammar(String fileName) throws IOException {
         FileRead f = new FileRead();
-        f.readText(fileName, this.grammar);
+        return f.readText(fileName, this.grammar);
     }
 
-    private long listSum(List<Long> list){
-        long sum = 0;
-        for (long j : list) {
-            sum += j;
+    private BigInteger listSum(List<BigInteger> list){
+        BigInteger sum = BigInteger.ZERO;
+        for (BigInteger j : list) {
+            sum = sum.add(j);
         }
         return sum;
     }
 
-    private List<Long> f1(long i, long n){
-        long si = this.grammar.getProductions(this.grammar.getN().getSymbol((int)i)).getRightSide().size();
-        List<Long> list = new ArrayList<>();
-        for(long j = 1; j <= si; j++){
-            if(this.fValues.containsKey(new ArrayList<>(Arrays.asList(i, j, 1L, n)))){
-                list.add(listSum(this.fValues.get(new ArrayList<>(Arrays.asList(i, j, 1L, n)))));
+    private List<BigInteger> f1(int i, int n){
+        int si = this.grammar.getProductions(this.grammar.getN().getTerminal(i-1)).getRightSide().size();
+        List<BigInteger> list = new ArrayList<>();
+        for(int j = 1; j <= si; j++){
+            if(this.fValues.containsKey(new ArrayList<>(Arrays.asList(i, j, 1, n)))){
+                list.add(listSum(this.fValues.get(new ArrayList<>(Arrays.asList(i, j, 1, n)))));
             }
             else{
-                list.add(listSum(f2(i, j, 1L, n)));
+                list.add(listSum(f2(i, j, 1, n)));
             }
-
         }
         this.fValues.put(new ArrayList<>(Arrays.asList(i, n)), list);
         return list;
     }
 
-    public long lenghtOfProduction(String word){
-        //String word = this.findRightSideString(j);
-        long count = 1;
-        long end = word.indexOf(" ");
-        long start;
+    public int lengthOfProduction(String word){
+        int count = 1;
+        int end = word.indexOf(" ");
+        int start;
         if(end != -1){
             do{
                 count++;
                 start = end;
-                end = word.indexOf(" ", (int)start+1);
+                end = word.indexOf(" ", start+1);
 
             }while(end != -1);
         }
         return count;
     }
 
-    private List<Long> f2(long i, long j, long k, long n){
-        List<Long> list = new ArrayList<>();
+    private List<BigInteger> f2(int i, int j, int k, int n){
+        List<BigInteger> list = new ArrayList<>();
         if(n == 0){
             this.fValues.put(new ArrayList<>(Arrays.asList(i, j, k, n)), list);
             return list;
         }
-        String xijk = this.grammar.getProductions((int)i-1).findSymbolInProduction((int)j-1, (int)k);
+        String xijk = this.grammar.getProductions(i-1).findSymbolInProduction(j-1, k);
+        //System.out.println(xijk);
         if(Objects.equals(xijk, "ε")){
             this.fValues.put(new ArrayList<>(Arrays.asList(i, j, k, n)), list);
             return list;
         }
-        long tij = this.lenghtOfProduction(this.grammar.getProductions((int)i-1).findRightSideString((int)j-1));
+        int tij = this.lengthOfProduction(this.grammar.getProductions(i-1).findRightSideString(j-1));
         if(this.grammar.getT().getAlphabet().contains(xijk)){
             if(k == tij){
                 if(n == 1){
-                    list.add(1L);
+                    list.add(BigInteger.ONE);
                     this.fValues.put(new ArrayList<>(Arrays.asList(i, j, k, n)), list);
                     return list;
                 }
                 else{
-                    list.add(0L);
+                    list.add(BigInteger.ZERO);
                     this.fValues.put(new ArrayList<>(Arrays.asList(i, j, k, n)), list);
                     return list;
                 }
@@ -141,21 +179,21 @@ public class Generator {
             return list;
         }
         else{
-            for(long l = 1; l <= n - tij + k; l++){
+            for(int l = 1; l <= n - tij + k; l++){
                 if(this.fValues.containsKey(new ArrayList<>(Arrays.asList(this.grammar.getN().getIndex(xijk), l)))){
                     if(this.fValues.containsKey(new ArrayList<>(Arrays.asList(i, j, k + 1, n - l)))){
-                        list.add(listSum(this.fValues.get(new ArrayList<>(Arrays.asList(this.grammar.getN().getIndex(xijk), l)))) * listSum(this.fValues.get(new ArrayList<>(Arrays.asList(i, j, k + 1, n - l)))));
+                        list.add(listSum(this.fValues.get(new ArrayList<>(Arrays.asList(this.grammar.getN().getIndex(xijk), l)))).multiply(listSum(this.fValues.get(new ArrayList<>(Arrays.asList(i, j, k + 1, n - l))))));
                     }
                     else{
-                        list.add(listSum(this.fValues.get(new ArrayList<>(Arrays.asList(this.grammar.getN().getIndex(xijk), l)))) * listSum(f2(i, j, k + 1, n - l)));
+                        list.add(listSum(this.fValues.get(new ArrayList<>(Arrays.asList(this.grammar.getN().getIndex(xijk), l)))).multiply(listSum(f2(i, j, k + 1, n - l))));
                     }
                 }
                 else{
                     if(this.fValues.containsKey(new ArrayList<>(Arrays.asList(i, j, k + 1, n - l)))){
-                        list.add(listSum(f1(this.grammar.getN().getIndex(xijk), l)) * listSum(this.fValues.get(new ArrayList<>(Arrays.asList(i, j, k + 1, n - l)))));
+                        list.add(listSum(f1(this.grammar.getN().getIndex(xijk), l)).multiply(listSum(this.fValues.get(new ArrayList<>(Arrays.asList(i, j, k + 1, n - l))))));
                     }
                     else{
-                        list.add(listSum(f1(this.grammar.getN().getIndex(xijk), l)) * listSum(f2(i, j, k + 1, n - l)));
+                        list.add(listSum(f1(this.grammar.getN().getIndex(xijk), l)).multiply(listSum(f2(i, j, k + 1, n - l))));
                     }
                 }
             }
@@ -164,53 +202,32 @@ public class Generator {
         }
     }
 
-    public long choose(List<Long> list){
-        List<Long> boundaries = new ArrayList<>();
+    public int choose(List<BigInteger> list){
+        List<BigInteger> boundaries = new ArrayList<>();
         boundaries.add(list.get(0));
-        for(long i = 1; i < list.size(); i++){
-            boundaries.add(boundaries.get((int)i-1) + list.get((int)i));
+        for(int i = 1; i < list.size(); i++){
+            boundaries.add(boundaries.get(i-1).add(list.get(i)));
         }
 
-        //long x = this.rnd.nextLong(boundaries.get(boundaries.size()-1));
+        BigInteger rightLimit = boundaries.get(boundaries.size()-1);
+        BigInteger randomNumber;
+        if(rightLimit.equals(BigInteger.ZERO)){
+            return -1;
+        }
+        do {
+            randomNumber = new BigInteger(rightLimit.bitLength(), this.rnd);
+        } while (randomNumber.compareTo(rightLimit) >= 0);
 
-        long leftLimit = 0L;
-        long rightLimit = boundaries.get(boundaries.size()-1);
-        long x = leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
-
-        for(long i = 0; i < boundaries.size(); i++){
-            if(boundaries.get((int)i) > x){
+        for(int i = 0; i < boundaries.size(); i++){
+            if(boundaries.get(i).compareTo(randomNumber) == 1){
                 return i+1;
             }
         }
         return -1;
-
-        /*long notZero = 0;
-        long ind = -1;
-        for(long i = 0; i < list.size(); i++){
-            if(list.get(i) != 0){
-                notZero += 1;
-                ind = i;
-            }
-        }
-        if(notZero == 1){
-            return ind+1;
-        }
-        List<longeger> indexes = new ArrayList<>();
-        for (long i = 0; i < list.size(); i++) {
-            if(list.get(i) > 0){
-                for(long j = 0; j < list.get(i); j++){
-                    indexes.add(i);
-                }
-            }
-        }
-        if(indexes.size() == 0){
-            return -1;
-        }
-        return indexes.get(this.rnd.nextlong(indexes.size())) + 1;*/
     }
 
-    public StringBuilder g1(long i, long n){
-        long r;
+    public StringBuilder g1(int i, int n){
+        int r;
         if(this.fValues.containsKey(new ArrayList<>(Arrays.asList(i, n)))){
             r = choose(this.fValues.get(new ArrayList<>(Arrays.asList(i, n))));
         }
@@ -223,10 +240,10 @@ public class Generator {
         return g2(i, r, 1, n);
     }
 
-    public StringBuilder g2(long i, long j, long k, long n) {
+    public StringBuilder g2(int i, int j, int k, int n) {
         StringBuilder result = new StringBuilder();
-        String xijk = this.grammar.getProductions((int)i - 1).findSymbolInProduction((int)j - 1,(int) k);
-        long tij = this.grammar.getProductions((int)i - 1).lenghtOfProduction((int)j - 1);
+        String xijk = this.grammar.getProductions(i - 1).findSymbolInProduction(j - 1, k);
+        long tij = this.grammar.getProductions(i - 1).lengthOfProduction(j - 1);
         if(this.grammar.getT().getAlphabet().contains(xijk)) {
             if (k == tij) {
                 return result.append(xijk);
@@ -240,7 +257,7 @@ public class Generator {
             return g1(this.grammar.getN().getIndex(xijk), n);
         }
         else{
-            long l;
+            int l;
             if(this.fValues.containsKey(new ArrayList<>(Arrays.asList(i, j, k, n)))){
                 l = choose(this.fValues.get(new ArrayList<>(Arrays.asList(i, j, k, n))));
             }

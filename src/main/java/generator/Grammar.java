@@ -9,8 +9,8 @@ public class Grammar {
     private final Set<Productions> productions;
 
     public Grammar() {
-        this.n = new Alphabet(LettersType.NONTERMINALS);
-        this.t = new Alphabet(LettersType.TERMINALS);
+        this.n = new Alphabet();
+        this.t = new Alphabet();
         this.productions = new LinkedHashSet<>();
     }
 
@@ -30,6 +30,10 @@ public class Grammar {
         return s;
     }
 
+    public Set<Productions> getProductions() {
+        return productions;
+    }
+
     /** adding a new production **/
     public void addToProductions(String key, String value) {
         Productions p = null;
@@ -43,11 +47,6 @@ public class Grammar {
         if(p != null){
             p.getRightSide().add(value);
         }
-    }
-
-    /** get all productions **/
-    public Set<Productions> getProductions() {
-        return productions;
     }
 
     public Productions getProductions(int index) {
@@ -86,7 +85,11 @@ public class Grammar {
             boolean contains = false;
             for(Productions p : this.productions){
                 for(String s : p.getRightSide()){
-                    if(s.contains(terminal)){
+                    StringBuilder sHelp = new StringBuilder();
+                    sHelp.append(" ").append(s).append(" ");
+                    StringBuilder terminalHelp = new StringBuilder();
+                    terminalHelp.append(" ").append(terminal).append(" ");
+                    if(sHelp.toString().contains(terminalHelp)){
                         contains = true;
                         break;
                     }
@@ -102,9 +105,13 @@ public class Grammar {
     }
 
     private boolean findSymbolRight(String symbol){
+        StringBuilder symbolHelp = new StringBuilder();
+        symbolHelp.append(" ").append(symbol).append(" ");
         for(Productions p : this.productions){
             for(String s : p.getRightSide()){
-                if(s.contains(symbol)){
+                StringBuilder sHelp = new StringBuilder();
+                sHelp.append(" ").append(s).append(" ");
+                if(sHelp.toString().contains(symbolHelp)){
                     return true;
                 }
             }
@@ -113,6 +120,8 @@ public class Grammar {
     }
 
     private void deleteProductionRight(String symbol){
+        StringBuilder symbolHelp = new StringBuilder();
+        symbolHelp.append(" ").append(symbol).append(" ");
         int numberOfProductions = productions.size();
         for(int i = 0; i < numberOfProductions; i++){
             Productions p = this.getProductions(i);
@@ -120,8 +129,13 @@ public class Grammar {
                 int numberOfRightStrings = p.getRightSide().size();
                 for(int j = 0; j < numberOfRightStrings; j++) {
                     String s = p.findRightSideString(j);
-                    if (s.contains(symbol)) {
+                    StringBuilder sHelp = new StringBuilder();
+                    sHelp.append(" ").append(s).append(" ");
+                    if(sHelp.toString().contains(symbolHelp)) {
                         p.getRightSide().remove(s);
+                        j--;
+                        //numberOfProductions--;
+                        numberOfRightStrings--;
                     }
                 }
             }
@@ -224,12 +238,16 @@ public class Grammar {
     /** creates new productions after deleting epsilon productions **/
     private Set<String> createNewProductions(Set<String> n_epsilon,  Productions p, String s){
         Set<String> productionsToAdd = new HashSet<>();
-        List<Integer> index = new ArrayList<>();
+        List<Integer> index;
         int counter;
         for(String n : n_epsilon){
             counter = 0;
-            index.removeAll(index);
-            if(s.contains(n)){
+            index = new ArrayList<>();
+            StringBuilder sHelp = new StringBuilder();
+            sHelp.append(" ").append(s).append(" ");
+            StringBuilder nHelp = new StringBuilder();
+            nHelp.append(" ").append(n).append(" ");
+            if(sHelp.toString().contains(nHelp)){
                 index.add(s.indexOf(n));
                 while(index.get(counter) > 0){
                     index.add(s.indexOf(n, index.get(counter) + 1));
@@ -254,6 +272,9 @@ public class Grammar {
         do{
             n_e.addAll(n_epsilon);
             n_epsilon.addAll(findSymbol(n_e));
+            if(n_e.size() == 1){
+                //System.out.println(n_epsilon.size()-1);
+            }
         }while(n_e.size() != n_epsilon.size());
         n_epsilon.remove("ε");
         return n_epsilon;
@@ -262,26 +283,11 @@ public class Grammar {
     /** searching for non-terminal symbols that have the required characters on the right-hand side of the productions **/
     private Set<String> findSymbol(Set<String> symbols){
         Set<String> n_e = new HashSet<>();
-        int counter;
-        int productionLength;
         for(Productions p : this.productions){
-            counter = 0;
-            productionLength = -1;
             for(String symbol : symbols) {
-                for(String r : p.getRightSide()){
-                    if (r.contains(symbol)){
-                        counter++;
-                        if(productionLength == -1){
-                            productionLength++;
-                        }
-                        productionLength += r.length();
-                    }
-                }
-                if(counter == productionLength){
+                if(p.getRightSide().contains(symbol)){
                     n_e.add(p.getLeftSide());
                 }
-                counter = 0;
-                productionLength = -1;
             }
         }
         return n_e;
@@ -290,7 +296,7 @@ public class Grammar {
     public boolean removingRedundantSymbols(){
         Set<String> remainingSymbols = deriveTerminals();
         if(!remainingSymbols.contains(this.s)){
-            System.out.println("The grammar generates an empty language, so no word can be derived from the initial symbol.");
+            //System.out.println("The grammar generates an empty language, so no word can be derived from the initial symbol.");
             return false;
         }
         else{
@@ -351,7 +357,11 @@ public class Grammar {
             if(production != null){
                 for(String word : production.getRightSide()){
                     for(String nonterminal : this.n.getAlphabet()){
-                        if(word.contains(nonterminal)){
+                        StringBuilder wordHelp = new StringBuilder();
+                        wordHelp.append(" ").append(word).append(" ");
+                        StringBuilder nonterminalHelp = new StringBuilder();
+                        nonterminalHelp.append(" ").append(nonterminal).append(" ");
+                        if(wordHelp.toString().contains(nonterminalHelp)){
                             v_d1.add(nonterminal);
                         }
                     }
@@ -409,9 +419,11 @@ public class Grammar {
     }
 
     private void deleteNonterminals(Set<String> nonterminals, boolean removeFromRight){
+        //System.out.println("nadbytocne:");
         for(int i = 0; i < this.n.getAlphabet().size(); i++){
             String symbol = this.n.getTerminal(i);
             if(!nonterminals.contains(symbol)){
+                //System.out.println(symbol);
                 this.n.getAlphabet().remove(symbol);
                 this.productions.remove(this.getProductions(symbol));
                 if(removeFromRight){
@@ -419,6 +431,94 @@ public class Grammar {
                 }
             }
         }
+    }
+
+    /** vlastna gramatika **/
+
+    public boolean containsCyclus(){
+        for(Productions production : this.productions){
+            Set<String> n = new HashSet<>();
+            n.add(production.getLeftSide());
+            Set<String> n_n;
+            do{
+                n_n = n;
+                n = new HashSet<>();
+                for(String nont : n_n){
+                    /*if(production.getRightSide().contains(nont)){
+                        n.add(nont);
+                    }*/
+                    for(String s : this.n.getAlphabet()){
+                        if(this.getProductions(nont).getRightSide().contains(s)){
+                            n.add(s);
+                        }
+                    }
+                }
+                if(n.contains(production.getLeftSide())){
+                    //System.out.println("ano cyklus");
+                    return true;
+                }
+                else{
+                    n.addAll(n_n);
+                }
+            }while(!n.equals(n_n));
+        }
+        //System.out.println("nie cyklus");
+        return false;
+    }
+
+    public void ownGrammar(){
+        for(String nonterminal : this.n.getAlphabet()){
+            Set<String> n = new HashSet<>();
+            n.add(nonterminal);
+            Set<String> n_n;
+            do{
+                n_n = n;
+                n = new HashSet<>();
+                for(String nont : n_n){
+                    for(String s : this.n.getAlphabet()){
+                        if(this.getProductions(nont).getRightSide().contains(s)){
+                            n.add(s);
+                        }
+                    }
+                }
+                n.addAll(n_n);
+            }while(!n_n.equals(n));
+            for (String s : n) {
+                //System.out.println(nonterminal + " " + s);
+                this.getProductions(nonterminal).getRightSide().remove(s);
+                for(String string : this.getProductions(s).getRightSide()){
+                    if(!this.n.getAlphabet().contains(string)){
+                        this.getProductions(nonterminal).getRightSide().add(string);
+                    }
+                }
+            }
+        }
+        /*System.out.println("Vlastna gramatika");
+        System.out.print("\nN: ");
+        for(String s : this.n.getAlphabet()){
+            System.out.print(s + ", ");
+        }
+        System.out.print("\nT: ");
+        for(String s : this.t.getAlphabet()){
+            System.out.print(s + ", ");
+        }
+        System.out.println("\nS: " + s);
+        System.out.println("P: ");
+
+        for(Productions p : productions){
+            System.out.print(p.getLeftSide() + " -> ");
+            int numberOfRightStrings = p.getRightSide().size();
+            for(int j = 0; j < numberOfRightStrings; j++) {
+                String s = p.findRightSideString(j);
+                if(j == 0){
+                    System.out.println(s);
+                }
+                else{
+                    System.out.println("  |  " + s);
+                }
+            }
+
+        }*/
     }
 
 }

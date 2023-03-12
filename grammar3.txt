@@ -6,6 +6,7 @@
 %%
 Start: ab Prva ab Tretia
 Prva: bc Druha ab cd
+ | Druha
 Druha: cd bc Start cd
  | ε
 Tretia: ε

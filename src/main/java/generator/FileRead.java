@@ -1,19 +1,27 @@
 package generator;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
 public class FileRead {
 
     /** parses the file into a grammar **/
-    public void readText(String fileName, Grammar grammar) throws IOException {
-        FileReader fReader = new FileReader(fileName);
+    public String readText(String fileName, Grammar grammar) throws IOException {
+        FileReader fReader = null;
+        try {
+            fReader = new FileReader(fileName);
+        } catch (FileNotFoundException e) {
+            return "Failed to load file.";
+        }
         BufferedReader buffReader = new BufferedReader(fReader);
 
         int counter = 0;
         String line;
         String word = "";
+
+        int productionCount = 0;
 
         while (buffReader.ready()) {
             line = buffReader.readLine();
@@ -27,8 +35,15 @@ public class FileRead {
             /* entry of the initial symbol also adding in non-terminal symbols **/
             else if(line.contains("%start")){
                 word = (String) line.subSequence(7, line.length());
-                grammar.setS(word);
-                grammar.getN().getAlphabet().add(word);
+                if(!word.contains(" ")){
+                    grammar.setS(word);
+                    grammar.getN().getAlphabet().add(word);
+                }
+                else{
+                    //System.out.println("A non-terminal symbol cannot contain a space.");
+                    return "A non-terminal symbol cannot contain a space.";
+                }
+
             }
 
             /* rule area label */
@@ -46,14 +61,16 @@ public class FileRead {
                     position = line.indexOf(":");
                     word = (String) line.subSequence(0, position);
                     if(grammar.alphabetCheck(word)){
-                        System.out.println("The grammar is not correct: The terminal symbol cannot be on the left side of the production.");
-                        break;
+                        //System.out.println("The grammar is not correct: The terminal symbol cannot be on the left side of the production.");
+                        return "The grammar is not correct: The terminal symbol cannot be on the left side of the production.";
                     }
-                    grammar.getN().getAlphabet().add(word);
-                    /*else if(!grammar.getN().getAlphabet().contains(word)) {
+                    if(!word.contains(" ")){
                         grammar.getN().getAlphabet().add(word);
-                    }*/
-
+                    }
+                    else{
+                        //System.out.println("A non-terminal symbol cannot contain a space.");
+                        return "A non-terminal symbol cannot contain a space.";
+                    }
                 }
 
                 /* the line contains an OR rule **/
@@ -63,10 +80,12 @@ public class FileRead {
                 }
                 value = (String) line.subSequence(position+2, line.length());
                 grammar.addToProductions(word, value);
+                productionCount++;
             }
-            //System.out.println(line);
         }
         grammar.removeTerminals();
+        //System.out.println(productionCount);
+        return null;
 
         /*for (String i : grammar.getT().getAlphabet()){
             System.out.println(i);

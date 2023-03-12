@@ -3,27 +3,14 @@ package generator;
 import java.util.*;
 
 public class Alphabet {
-    private LettersType type;
-    private Set<String> alphabet;
+    private final Set<String> alphabet;
 
-    public Alphabet(LettersType type) {
-        this.type = type;
+    public Alphabet() {
         this.alphabet = new LinkedHashSet<>();
     }
 
     public Set<String> getAlphabet() {
         return alphabet;
-    }
-
-    public String getSymbol(int index){
-        int i = 1;
-        for(String s : this.alphabet){
-            if(i == index){
-                return s;
-            }
-            i++;
-        }
-        return null;
     }
 
     public int getIndex(String word){

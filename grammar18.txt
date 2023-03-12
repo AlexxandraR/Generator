@@ -1,0 +1,58 @@
+%token a
+%token b
+%token c
+%token d
+%token e
+%token f
+%token g
+%token h
+
+%start S
+%%
+S: a A
+ | b A
+ | c B
+ | d B
+ | f g h
+ | e A g
+ | ε
+ | A
+ | E a b
+ | E
+A: d B
+ | A B
+ | B d e
+ | B B
+ | C d
+ | B
+ | ε
+ | E F
+ | E
+B: ε
+ | S
+ | f A c B
+ | b c
+ | A
+ | A d E d d E
+ | C
+ | B B
+ | f e a C
+C: C
+ | a b A c A
+ | B
+ | A b c
+ | E a b E c E d g E h
+ | E
+D: C a
+E: C
+ | A
+ | B
+ | h g E a
+ | ε
+ | F
+F: E
+ | a b d F S
+ | E E e e d
+ | B A a b c
+ | F
+%%

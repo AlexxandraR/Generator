@@ -1,0 +1,36 @@
+%token a
+%token b
+%token c
+%token d
+%token e
+%token f
+%token g
+%token h
+
+%start S
+%%
+S: a A
+ | b A
+ | c B
+ | d B
+ | f g h
+ | e A g
+ | ε
+ | A
+A: d B
+ | A B
+ | B d e
+ | B B
+ | C d
+ | B
+ | ε
+B: ε
+ | S
+ | f A c B
+ | b c
+ | A
+ | C
+C: C
+ | a b A c A
+D: C a
+%%
