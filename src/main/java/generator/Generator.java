@@ -2,6 +2,7 @@ package generator;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.*;
 
 public class Generator {
@@ -208,16 +209,14 @@ public class Generator {
         for(int i = 1; i < list.size(); i++){
             boundaries.add(boundaries.get(i-1).add(list.get(i)));
         }
-
         BigInteger rightLimit = boundaries.get(boundaries.size()-1);
         BigInteger randomNumber;
         if(rightLimit.equals(BigInteger.ZERO)){
             return -1;
         }
-        do {
-            randomNumber = new BigInteger(rightLimit.bitLength(), this.rnd);
-        } while (randomNumber.compareTo(rightLimit) >= 0);
-
+        BigDecimal tmp = BigDecimal.valueOf(Math.random());
+        tmp = tmp.multiply(new BigDecimal(rightLimit));
+        randomNumber = tmp.toBigInteger();
         for(int i = 0; i < boundaries.size(); i++){
             if(boundaries.get(i).compareTo(randomNumber) == 1){
                 return i+1;
