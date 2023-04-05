@@ -341,6 +341,9 @@ public class Grammar {
                 }
             }
         }
+        if(productionsToAdd.contains(p.getLeftSide())){
+            productionsToAdd.remove(p.getLeftSide());
+        }
         return productionsToAdd;
     }
 
