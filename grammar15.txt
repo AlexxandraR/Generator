@@ -8,7 +8,7 @@
 %%
 <program>: begin <postupnost prikazov> end
 <postupnost prikazov>: <prikaz> ; <postupnost prikazov>
- | ε
+ |
 <prikaz>: p1
  | p2
 %%

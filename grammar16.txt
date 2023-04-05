@@ -9,7 +9,7 @@ S: a A
 A: d B
  | A B
  | B
-B: ε
+B:
  | b c
  | A
 %%

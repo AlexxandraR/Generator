@@ -5,9 +5,9 @@
 %start Start
 %%
 Start: ab Prva
- | ε
+ |
 Prva: bc Druha
 Druha: cd bc Start
  | Start
- | ε
+ |
 %%

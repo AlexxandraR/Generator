@@ -7,7 +7,13 @@ import java.io.IOException;
 
 public class FileRead {
 
-    /** parses the file into a grammar **/
+    /**
+     * parses the file into a grammar
+     * @param fileName the file from which the grammar is loaded
+     * @param grammar variable into which the grammar from the file is saved
+     * @return null if everything was loaded correctly and an error message if the loading was not successful
+     * @throws IOException if something failed while reading the file
+     */
     public String readText(String fileName, Grammar grammar) throws IOException {
         FileReader fReader = null;
         try {
@@ -78,15 +84,18 @@ public class FileRead {
                     position = line.indexOf("|");
 
                 }
-                value = (String) line.subSequence(position+2, line.length());
-                grammar.addToProductions(word, value);
+                if(line.length() > position+2){
+                    value = (String) line.subSequence(position+2, line.length());
+                    grammar.addToProductions(word, value);
+                }
+                else{
+                    grammar.addToProductions(word, "");
+                }
                 productionCount++;
             }
         }
         grammar.removeTerminals();
         //System.out.println(productionCount);
-        return null;
-
         /*for (String i : grammar.getT().getAlphabet()){
             System.out.println(i);
         }
@@ -99,6 +108,7 @@ public class FileRead {
         for(Productions p : grammar.getProductions()){
             System.out.println(p.getLeftSide() + p.getRightSide());
         }*/
+        return null;
 
     }
 

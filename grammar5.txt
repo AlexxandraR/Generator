@@ -13,6 +13,6 @@ A: b B
  | a B
  | a B b
  | b c B
-B: ε
+B:
  | c
 %%

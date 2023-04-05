@@ -15,7 +15,7 @@ S: a A
  | d B
  | f g h
  | e A g
- | ε
+ |
  | A
 A: d B
  | A B
@@ -23,8 +23,8 @@ A: d B
  | B B
  | C d
  | B
- | ε
-B: ε
+ |
+B:
  | S
  | f A c B
  | b c

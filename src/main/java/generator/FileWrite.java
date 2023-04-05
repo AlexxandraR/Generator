@@ -5,6 +5,14 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class FileWrite {
+    /**
+     * writes grammar in bison format, input parameters and generated words to the file
+     * @param g an instance of the Generator class
+     * @param beginLength shortest word length
+     * @param endLength longest word length
+     * @param numberOfRepetitions number of repetitions
+     * @throws IOException if writing into file fails
+     */
     public void writeText(Generator g, int beginLength, int endLength, int numberOfRepetitions) throws IOException {
         FileWriter output = new FileWriter("output.txt");
 
@@ -51,18 +59,33 @@ public class FileWrite {
         output.close();
     }
 
+    /**
+     * writes an error message to the file
+     * @param message error message
+     * @throws IOException if writing into file fails
+     */
     public void writeException(String message) throws IOException {
         FileWriter output = new FileWriter("output.txt");
         output.write(message);
         output.close();
     }
 
+    /**
+     * adds the message to the file
+     * @param message message to add
+     * @throws IOException if writing into file fails
+     */
     public void appendText(String message) throws IOException {
         FileWriter output = new FileWriter("output.txt", true);
         output.write("\n" + message);
         output.close();
     }
 
+    /**
+     * writes statistics to a file
+     * @param pair HashMap containing statistics
+     * @throws IOException if writing into file fails
+     */
     public void appendStatistics(HashMap<String, Integer> pair) throws IOException {
         FileWriter output = new FileWriter("output.txt", true);
 

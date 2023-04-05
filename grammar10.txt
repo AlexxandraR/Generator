@@ -10,7 +10,7 @@ S: a A
  | B
 A: b B C
  | S
-B: ε
+B:
  | b b a
 C: a b c
 D: a

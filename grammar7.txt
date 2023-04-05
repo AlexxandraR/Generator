@@ -12,6 +12,6 @@ A: b B
  | d B c B B a
  | b c B
  | S
-B: ε
+B:
  | c
 %%

@@ -6,7 +6,7 @@
 %start S
 %%
 S: a A
- | ε
+ |
 A: b B
  | a B c B a A
  | d B c B B a
@@ -14,6 +14,6 @@ A: b B
  | a B b
  | b c B
  | S
-B: ε
+B:
  | c
 %%

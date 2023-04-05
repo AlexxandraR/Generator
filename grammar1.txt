@@ -9,6 +9,6 @@ S: ab
 A: ab
  | c
  | d S
-B: ε
+B:
  | c
 %%
