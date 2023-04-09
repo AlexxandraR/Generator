@@ -32,7 +32,7 @@ public class Productions {
     }
 
     /**
-     * finds the index of a particular production in the set of right sides of rules
+     * finds the index of a particular production in the set of right sides of productions
      * @param string a particular production
      * @return the index of a particular production
      */

@@ -125,7 +125,7 @@ public class Grammar {
      */
     public void removeTerminals(){
         for(int i = 0; i < this.t.getAlphabet().size(); i++){
-            String terminal = this.t.getTerminal(i);
+            String terminal = this.t.getSymbol(i);
             boolean contains = false;
             for(Productions p : this.productions){
                 for(String s : p.getRightSide()){
@@ -541,7 +541,7 @@ public class Grammar {
     private void deleteNonterminals(Set<String> nonterminals, boolean removeFromRight){
         //System.out.println("nadbytocne:");
         for(int i = 0; i < this.n.getAlphabet().size(); i++){
-            String symbol = this.n.getTerminal(i);
+            String symbol = this.n.getSymbol(i);
             if(!nonterminals.contains(symbol)){
                 //System.out.println(symbol);
                 this.n.getAlphabet().remove(symbol);

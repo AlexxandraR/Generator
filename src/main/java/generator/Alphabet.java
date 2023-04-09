@@ -37,11 +37,11 @@ public class Alphabet {
     }
 
     /**
-     * returns the non-terminal at the index in alphabet
-     * @param index the index of the non-terminal we are looking for
-     * @return wanted non-terminal
+     * returns the symbol at the index in alphabet
+     * @param index the index of the symbol we are looking for
+     * @return wanted symbol
      */
-    public String getTerminal(int index) {
+    public String getSymbol(int index) {
         int i = 0;
         for(String word : this.alphabet){
             if(i == index){
