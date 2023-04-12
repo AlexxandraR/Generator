@@ -57,7 +57,7 @@ public class Generator {
         if(canContinue == null){
             this.grammar.eliminateEpsilonProductions();
             if(this.grammar.containsCyclus()){
-                this.grammar.ownGrammar();
+                this.grammar.properGrammar();
             }
             boolean continueOrNot = this.grammar.removingRedundantSymbols();
 
@@ -305,7 +305,8 @@ public class Generator {
     }
 
     /**
-     * ???
+     * randomly generates a word of length n from the trailing symbols x_ijk. . . x_ijt_ij
+     * taken from the right-hand side of the production π_ij
      * @param i index of non-terminal
      * @param j index of rule for non-terminal N_i
      * @param k k takes on values from 0 to the number of symbols in the rule

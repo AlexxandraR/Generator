@@ -593,7 +593,7 @@ public class Grammar {
     /**
      * adjusts the grammar to the shape of own grammar
      */
-    public void ownGrammar(){
+    public void properGrammar(){
         for(String nonterminal : this.n.getAlphabet()){
             Set<String> n = new HashSet<>();
             n.add(nonterminal);
